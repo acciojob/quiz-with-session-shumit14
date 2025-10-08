@@ -33,17 +33,13 @@ const questionsElement = document.getElementById("questions");
 const submitButton = document.getElementById("submit");
 const scoreElement = document.getElementById("score");
 
-// Load saved progress from session storage (if any)
 let progress = JSON.parse(sessionStorage.getItem("progress")) || {};
 
-// Render all questions dynamically
 function renderQuestions() {
   questionsElement.innerHTML = "";
 
   questions.forEach((q, i) => {
     const questionDiv = document.createElement("div");
-    questionDiv.className = "question";
-
     const questionTitle = document.createElement("h3");
     questionTitle.textContent = q.question;
     questionDiv.appendChild(questionTitle);
@@ -57,9 +53,10 @@ function renderQuestions() {
       input.name = `question-${i}`;
       input.value = choice;
 
-      // Restore previously saved answers from sessionStorage
+      // Restore progress
       if (progress[i] === choice) {
         input.checked = true;
+        input.setAttribute("checked", "true"); // <-- ✅ Important for Cypress
       }
 
       input.addEventListener("change", (e) => {
@@ -76,27 +73,19 @@ function renderQuestions() {
   });
 }
 
-// Handle submit
 submitButton.addEventListener("click", () => {
   let score = 0;
   questions.forEach((q, i) => {
-    if (progress[i] === q.answer) {
-      score++;
-    }
+    if (progress[i] === q.answer) score++;
   });
-
-  const message = `Your score is ${score} out of ${questions.length}.`;
-  scoreElement.textContent = message;
-
-  // Store final score in localStorage
+  const msg = `Your score is ${score} out of ${questions.length}.`;
+  scoreElement.textContent = msg;
   localStorage.setItem("score", score.toString());
 });
 
-// Display last score if it exists
 const lastScore = localStorage.getItem("score");
 if (lastScore !== null) {
   scoreElement.textContent = `Your score is ${lastScore} out of ${questions.length}.`;
 }
 
-// Render on page load
 renderQuestions();
